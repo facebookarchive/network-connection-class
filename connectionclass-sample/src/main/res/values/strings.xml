@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ConnectionClass Sample</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="connection_class">Your connection class is:</string>
+
+</resources>

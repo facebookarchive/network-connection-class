@@ -52,7 +52,11 @@ public class DeviceBandwidthSampler {
   @Nonnull
   public static DeviceBandwidthSampler getInstance() {
     if (sInstance == null) {
-      sInstance = new DeviceBandwidthSampler(ConnectionClassManager.getInstance());
+      synchronized (DeviceBandwidthSampler.class) {
+        if (sInstance == null) {
+          sInstance = new DeviceBandwidthSampler(ConnectionClassManager.getInstance());
+        }
+      }
     }
     return sInstance;
   }

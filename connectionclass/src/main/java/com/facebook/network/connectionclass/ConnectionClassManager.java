@@ -74,7 +74,11 @@ public class ConnectionClassManager {
   @Nonnull
   public static ConnectionClassManager getInstance() {
     if (sInstance == null) {
-      sInstance = new ConnectionClassManager();
+      synchronized (ConnectionClassManager.class) {
+        if (sInstance == null) {
+          sInstance = new ConnectionClassManager();
+        }
+      }
     }
     return sInstance;
   }

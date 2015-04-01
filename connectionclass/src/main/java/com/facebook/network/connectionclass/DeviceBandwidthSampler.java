@@ -41,20 +41,19 @@ public class DeviceBandwidthSampler {
 
   private long mLastTimeReading;
 
-  // Make BandwidthTimerManager a singleton.
-  @Nullable
-  private static DeviceBandwidthSampler sInstance;
+  // Singleton.
+  private static class DeviceBandwidthSamplerHolder {
+      public static final DeviceBandwidthSampler instance =
+              new DeviceBandwidthSampler(ConnectionClassManager.getInstance());
+  }
 
   /**
-   * Retrieval method for the BandwidthTimerManager singleton.
-   * @return The singleton instance of BandwidthTimerManager.
+   * Retrieval method for the DeviceBandwidthSampler singleton.
+   * @return The singleton instance of DeviceBandwidthSampler.
    */
   @Nonnull
   public static DeviceBandwidthSampler getInstance() {
-    if (sInstance == null) {
-      sInstance = new DeviceBandwidthSampler(ConnectionClassManager.getInstance());
-    }
-    return sInstance;
+    return DeviceBandwidthSamplerHolder.instance;
   }
 
   private DeviceBandwidthSampler(

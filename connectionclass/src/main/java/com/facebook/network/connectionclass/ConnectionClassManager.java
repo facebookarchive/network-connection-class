@@ -64,8 +64,9 @@ public class ConnectionClassManager {
   static final long BANDWIDTH_LOWER_BOUND = 10;
 
   // Singleton.
-  @Nullable
-  private static ConnectionClassManager sInstance;
+  private static class ConnectionClassManagerHolder {
+      public static final ConnectionClassManager instance = new ConnectionClassManager();
+  }
 
   /**
    * Retrieval method for the DownloadBandwidthManager singleton.
@@ -73,10 +74,7 @@ public class ConnectionClassManager {
    */
   @Nonnull
   public static ConnectionClassManager getInstance() {
-    if (sInstance == null) {
-      sInstance = new ConnectionClassManager();
-    }
-    return sInstance;
+      return ConnectionClassManagerHolder.instance;
   }
 
   // Force constructor to be private.

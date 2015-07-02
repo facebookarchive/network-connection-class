@@ -97,11 +97,11 @@ public class DeviceBandwidthSampler {
     public void handleMessage(Message msg) {
       switch (msg.what) {
         case MSG_START:
-          addSample();
+          addSample(false);
           sendEmptyMessageDelayed(MSG_START, SAMPLE_TIME);
           break;
         case MSG_STOP:
-          addSample();
+          addSample(true);
           removeMessages(MSG_START);
           break;
         default:
@@ -113,7 +113,7 @@ public class DeviceBandwidthSampler {
      * Method for polling for the change in total bytes since last update and
      * adding it to the BandwidthManager.
      */
-    private void addSample() {
+    private void addSample(boolean cleanPreviousReadBytes) {
       long byteDiff = QTagParser.getInstance().parseDataUsageForUidAndTag(Process.myUid());
       synchronized (this) {
         long curTimeReading = SystemClock.elapsedRealtime();
@@ -121,6 +121,12 @@ public class DeviceBandwidthSampler {
           mConnectionClassManager.addBandwidth(byteDiff, curTimeReading - mLastTimeReading);
         }
         mLastTimeReading = curTimeReading;
+
+        if (cleanPreviousReadBytes) {
+          //Reset previously read bytes so that we don't add bytes downloaded in between
+          // sampling sessions
+          QTagParser.resetPreviousBytes();
+        }
       }
     }
   }

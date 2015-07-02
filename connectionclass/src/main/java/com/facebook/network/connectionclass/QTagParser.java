@@ -146,4 +146,8 @@ class QTagParser {
     // Return -1 upon error.
     return -1;
   }
+
+  public static void resetPreviousBytes() {
+    sPreviousBytes = -1;
+  }
 }

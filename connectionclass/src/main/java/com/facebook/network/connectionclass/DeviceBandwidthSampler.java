@@ -101,7 +101,7 @@ public class DeviceBandwidthSampler {
           sendEmptyMessageDelayed(MSG_START, SAMPLE_TIME);
           break;
         case MSG_STOP:
-          addSample();
+          addFinalSample();
           removeMessages(MSG_START);
           break;
         default:
@@ -122,6 +122,15 @@ public class DeviceBandwidthSampler {
         }
         mLastTimeReading = curTimeReading;
       }
+    }
+
+    /**
+     * Resets previously read byte count after recording a sample, so that
+     * we don't count bytes downloaded in between sampling sessions.
+     */
+    private void addFinalSample() {
+      addSample();
+      QTagParser.resetPreviousBytes();
     }
   }
 

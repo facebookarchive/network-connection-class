@@ -78,7 +78,7 @@ ConnectionClassManager.addBandwidth(bandwidth, time);
 See the `connectionclass-sample` project for more details.
 
 ## Improve Connection Class!
-See the CONTRIBUTING.md file for how to help out.
+See the [CONTRIBUTING.md](https://github.com/facebook/network-connection-class/blob/master/CONTRIBUTING.md) file for how to help out.
 
 ## License
 Connection Class is BSD-licensed. We also provide an additional patent grant.

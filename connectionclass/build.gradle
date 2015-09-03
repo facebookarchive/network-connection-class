@@ -9,22 +9,22 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 }
 
-apply plugin: 'android-unit-test'
-
 dependencies {
     compile 'com.google.code.findbugs:jsr305:2.0.1'
-
     testCompile 'junit:junit:4.12'
-    testCompile('org.robolectric:robolectric:2.4') {
-        exclude module: 'commons-logging'
-        exclude module: 'httpclient'
+    testCompile 'org.mockito:mockito-core:2.0.5-beta'
+    testCompile 'org.robolectric:robolectric:3.0'
+    testCompile ('org.powermock:powermock-api-mockito:1.6.2') {
+        exclude module: 'hamcrest-core'
+        exclude module: 'objenesis'
     }
-    testCompile 'org.powermock:powermock-api-mockito:1.6.1'
-    testCompile 'org.powermock:powermock-module-junit4:1.6.1'
+    testCompile ('org.powermock:powermock-module-junit4:1.6.2') {
+        exclude module: 'hamcrest-core'
+        exclude module: 'objenesis'
+    }
 }
 
 apply from: rootProject.file('release.gradle')

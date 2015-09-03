@@ -12,9 +12,7 @@ package com.facebook.network.connectionclass;
 
 import android.os.StrictMode;
 import android.util.Log;
-import com.facebook.network.connectionclass.ConnectionClassManager;
-import com.facebook.network.connectionclass.QTagParser;
-import dalvik.annotation.TestTargetClass;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,12 +22,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.*;
 
 @RunWith(PowerMockRunner.class)
 public class ConnectionClassTest {

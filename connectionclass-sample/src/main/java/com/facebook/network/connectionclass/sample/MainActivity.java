@@ -22,6 +22,7 @@ import com.facebook.network.connectionclass.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 
 public class MainActivity extends Activity {
@@ -105,7 +106,10 @@ public class MainActivity extends Activity {
       String imageURL = url[0];
       try {
         // Open a stream to download the image from our URL.
-        InputStream input = new URL(imageURL).openStream();
+        URLConnection connection = new URL(imageURL).openConnection();
+        connection.setUseCaches(false);
+        connection.connect();
+        InputStream input = connection.getInputStream();
         try {
           byte[] buffer = new byte[1024];
 

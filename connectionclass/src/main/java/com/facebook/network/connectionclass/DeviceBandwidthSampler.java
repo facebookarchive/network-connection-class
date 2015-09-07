@@ -10,24 +10,21 @@
 
 package com.facebook.network.connectionclass;
 
-import android.os.*;
-import android.os.Process;
-
-import javax.annotation.Nullable;
-import javax.annotation.Nonnull;
+import android.net.TrafficStats;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.SystemClock;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nonnull;
+
 /**
- * Class used to read from the file {@code /proc/net/xt_qtaguid/stats} periodically, in order to
- * determine a ConnectionClass.
+ * Class used to read from TrafficStats periodically, in order to determine a ConnectionClass.
  */
 public class DeviceBandwidthSampler {
-
-  /**
-   * Time between polls in ms.
-   */
-  static final long SAMPLE_TIME = 1000;
 
   /**
    * The DownloadBandwidthManager that keeps track of the moving average and ConnectionClass.
@@ -36,10 +33,11 @@ public class DeviceBandwidthSampler {
 
   private AtomicInteger mSamplingCounter;
 
-  private Handler mHandler;
+  private SamplingHandler mHandler;
   private HandlerThread mThread;
 
   private long mLastTimeReading;
+  private static long sPreviousBytes = -1;
 
   // Singleton.
   private static class DeviceBandwidthSamplerHolder {
@@ -70,7 +68,7 @@ public class DeviceBandwidthSampler {
    */
   public void startSampling() {
     if (mSamplingCounter.getAndIncrement() == 0) {
-      mHandler.sendEmptyMessage(SamplingHandler.MSG_START);
+      mHandler.startSamplingThread();
       mLastTimeReading = SystemClock.elapsedRealtime();
     }
   }
@@ -81,57 +79,36 @@ public class DeviceBandwidthSampler {
    */
   public void stopSampling() {
     if (mSamplingCounter.decrementAndGet() == 0) {
-      mHandler.sendEmptyMessage(SamplingHandler.MSG_STOP);
+      mHandler.stopSamplingThread();
+      addFinalSample();
     }
   }
 
-  private class SamplingHandler extends Handler {
-    static final int MSG_START = 1;
-    static final int MSG_STOP = 2;
-
-    public SamplingHandler(Looper looper) {
-      super(looper);
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-      switch (msg.what) {
-        case MSG_START:
-          addSample();
-          sendEmptyMessageDelayed(MSG_START, SAMPLE_TIME);
-          break;
-        case MSG_STOP:
-          addFinalSample();
-          removeMessages(MSG_START);
-          break;
-        default:
-          throw new IllegalArgumentException("Unknown what=" + msg.what);
-      }
-    }
-
-    /**
-     * Method for polling for the change in total bytes since last update and
-     * adding it to the BandwidthManager.
-     */
-    private void addSample() {
-      long byteDiff = QTagParser.getInstance().parseDataUsageForUidAndTag(Process.myUid());
+  /**
+   * Method for polling for the change in total bytes since last update and
+   * adding it to the BandwidthManager.
+   */
+  protected void addSample() {
+    long newBytes = TrafficStats.getTotalRxBytes();
+    long byteDiff = newBytes - sPreviousBytes;
+    if (sPreviousBytes >= 0) {
       synchronized (this) {
         long curTimeReading = SystemClock.elapsedRealtime();
-        if (byteDiff != -1) {
-          mConnectionClassManager.addBandwidth(byteDiff, curTimeReading - mLastTimeReading);
-        }
+        mConnectionClassManager.addBandwidth(byteDiff, curTimeReading - mLastTimeReading);
+
         mLastTimeReading = curTimeReading;
       }
     }
+    sPreviousBytes = newBytes;
+  }
 
-    /**
-     * Resets previously read byte count after recording a sample, so that
-     * we don't count bytes downloaded in between sampling sessions.
-     */
-    private void addFinalSample() {
-      addSample();
-      QTagParser.resetPreviousBytes();
-    }
+  /**
+   * Resets previously read byte count after recording a sample, so that
+   * we don't count bytes downloaded in between sampling sessions.
+   */
+  protected void addFinalSample() {
+    addSample();
+    sPreviousBytes = -1;
   }
 
   /**
@@ -139,5 +116,39 @@ public class DeviceBandwidthSampler {
    */
   public boolean isSampling() {
     return (mSamplingCounter.get() != 0);
+  }
+
+  private class SamplingHandler extends Handler {
+      /**
+       * Time between polls in ms.
+       */
+      static final long SAMPLE_TIME = 1000;
+
+      static private final int MSG_START = 1;
+
+      public SamplingHandler(Looper looper) {
+          super(looper);
+      }
+
+      @Override
+      public void handleMessage(Message msg) {
+          switch (msg.what) {
+              case MSG_START:
+                  addSample();
+                  sendEmptyMessageDelayed(MSG_START, SAMPLE_TIME);
+                  break;
+              default:
+                  throw new IllegalArgumentException("Unknown what=" + msg.what);
+          }
+      }
+
+
+      public void startSamplingThread() {
+          sendEmptyMessage(SamplingHandler.MSG_START);
+      }
+
+      public void stopSamplingThread() {
+          removeMessages(SamplingHandler.MSG_START);
+      }
   }
 }

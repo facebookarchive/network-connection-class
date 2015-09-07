@@ -10,16 +10,10 @@
 
 package com.facebook.network.connectionclass;
 
-import android.os.StrictMode;
-import android.util.Log;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
@@ -95,47 +89,6 @@ public class ConnectionClassTest {
       mConnectionClassManager.addBandwidth(1000, 2);
     }
     assertEquals(1, mTestBandwidthStateChangeListener.getNumberOfStateChanges());
-  }
-
-  @PrepareForTest(StrictMode.class)
-  @Test
-  public void testParserWithExpectedInput()
-      throws Exception {
-    int testUid = 10237;
-    PowerMockito.mockStatic(StrictMode.class);
-    PowerMockito.doNothing().when(StrictMode.class, "setThreadPolicy", Matchers.anyObject());
-    QTagParser testParser =
-        new QTagParser("src/test/java/com/facebook/network/connectionclass/sampleqtaguidstats.txt");
-    long result = testParser.parseDataUsageForUidAndTag(testUid);
-    assertEquals(-1, result);
-    result = testParser.parseDataUsageForUidAndTag(testUid);
-    assertEquals(0, result);
-  }
-
-  @PrepareForTest({StrictMode.class,Log.class})
-  @Test
-  public void testParserDoesNotCrashOnWrongNumberOfTokens()
-      throws Exception {
-    PowerMockito.mockStatic(StrictMode.class);
-    PowerMockito.doNothing().when(StrictMode.class, "setThreadPolicy", Matchers.anyObject());
-    PowerMockito.mockStatic(Log.class);
-    PowerMockito.doReturn(1).when(Log.class, "e", Matchers.anyString(), Matchers.anyString());
-    QTagParser testParser =
-        new QTagParser("src/test/java/com/facebook/network/connectionclass/strangelytokenedfile.txt");
-    testParser.parseDataUsageForUidAndTag(0);
-  }
-
-  @PrepareForTest({StrictMode.class,Log.class})
-  @Test
-  public void testParserDoesNotCrashOnInvalidRxBytes()
-      throws Exception {
-    PowerMockito.mockStatic(StrictMode.class);
-    PowerMockito.doNothing().when(StrictMode.class, "setThreadPolicy", Matchers.anyObject());
-    PowerMockito.mockStatic(Log.class);
-    PowerMockito.doReturn(1).when(Log.class, "e", Matchers.anyString(), Matchers.anyString());
-    QTagParser testParser =
-        new QTagParser("src/test/java/com/facebook/network/connectionclass/invalidrxbytes.txt");
-    testParser.parseDataUsageForUidAndTag(0);
   }
 
   private class TestBandwidthStateChangeListener implements

@@ -23,14 +23,14 @@ a bucket change):
 ### Download
 Download [the latest JARs](https://github.com/facebook/network-connection-class/releases/latest) or grab via Gradle:
 ```groovy
-compile 'com.facebook.network.connectionclass:connectionclass:1.0.2'
+compile 'com.facebook.network.connectionclass:connectionclass:1.0.1'
 ```
 or Maven:
 ```xml
 <dependency>
   <groupId>com.facebook.network.connectionclass</groupId>
   <artifactId>connectionclass</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 

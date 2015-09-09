@@ -10,9 +10,7 @@
 
 package com.facebook.network.connectionclass;
 
-import javax.annotation.Nullable;
 import javax.annotation.Nonnull;
-
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,16 +25,19 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ConnectionClassManager {
 
-  static final double DEFAULT_SAMPLES_TO_QUALITY_CHANGE = 5;
+  /*package*/ static final double DEFAULT_SAMPLES_TO_QUALITY_CHANGE = 5;
   private static final int BYTES_TO_BITS = 8;
 
   /**
    * Default values for determining quality of data connection.
    * Bandwidth numbers are in Kilobits per second (kbps).
    */
-  private static final int DEFAULT_POOR_BANDWIDTH = 150;
-  private static final int DEFAULT_MODERATE_BANDWIDTH = 550;
-  private static final int DEFAULT_GOOD_BANDWIDTH = 2000;
+  /*package*/ static final int DEFAULT_POOR_BANDWIDTH = 150;
+  /*package*/ static final int DEFAULT_MODERATE_BANDWIDTH = 550;
+  /*package*/ static final int DEFAULT_GOOD_BANDWIDTH = 2000;
+  /*package*/ static final long DEFAULT_HYSTERESIS_PERCENT = 20;
+  private static final double HYSTERESIS_TOP_MULTIPLIER = 100.0 / (100.0 - DEFAULT_HYSTERESIS_PERCENT);
+  private static final double HYSTERESIS_BOTTOM_MULTIPLIER = (100.0 - DEFAULT_HYSTERESIS_PERCENT) / 100.0;
 
   /**
    * The factor used to calculate the current bandwidth
@@ -101,7 +102,7 @@ public class ConnectionClassManager {
         mInitiateStateChange = false;
         mSampleCounter = 1;
       }
-      if (mSampleCounter >= DEFAULT_SAMPLES_TO_QUALITY_CHANGE) {
+      if (mSampleCounter >= DEFAULT_SAMPLES_TO_QUALITY_CHANGE  && significantlyOutsideCurrentBand()) {
         mInitiateStateChange = false;
         mSampleCounter = 1;
         mCurrentBandwidthConnectionQuality.set(mNextBandwidthConnectionQuality.get());
@@ -115,6 +116,45 @@ public class ConnectionClassManager {
       mNextBandwidthConnectionQuality =
           new AtomicReference<ConnectionQuality>(getCurrentBandwidthQuality());
     }
+  }
+
+  private boolean significantlyOutsideCurrentBand() {
+    if (mDownloadBandwidth == null) {
+      // Make Infer happy. It wouldn't make any sense to call this while mDownloadBandwidth is null.
+      return false;
+    }
+    ConnectionQuality currentQuality = mCurrentBandwidthConnectionQuality.get();
+    double bottomOfBand;
+    double topOfBand;
+    switch (currentQuality) {
+      case POOR:
+        bottomOfBand = 0;
+        topOfBand = DEFAULT_POOR_BANDWIDTH;
+        break;
+      case MODERATE:
+        bottomOfBand = DEFAULT_POOR_BANDWIDTH;
+        topOfBand = DEFAULT_MODERATE_BANDWIDTH;
+        break;
+      case GOOD:
+        bottomOfBand = DEFAULT_MODERATE_BANDWIDTH;
+        topOfBand = DEFAULT_GOOD_BANDWIDTH;
+        break;
+      case EXCELLENT:
+        bottomOfBand = DEFAULT_GOOD_BANDWIDTH;
+        topOfBand = Float.MAX_VALUE;
+        break;
+      default: // If current quality is UNKNOWN, then changing is always valid.
+        return true;
+    }
+    double average = mDownloadBandwidth.getAverage();
+    if (average > topOfBand) {
+      if (average > topOfBand * HYSTERESIS_TOP_MULTIPLIER) {
+        return true;
+      }
+    } else if (average < bottomOfBand * HYSTERESIS_BOTTOM_MULTIPLIER) {
+      return true;
+    }
+    return false;
   }
 
   /**

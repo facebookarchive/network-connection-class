@@ -28,6 +28,7 @@ import java.net.URLConnection;
 public class MainActivity extends Activity {
 
   private static final String TAG = "ConnectionClass-Sample";
+  private static final int MAX_SAMPLE_RETRIES = 10;
 
   private ConnectionClassManager mConnectionClassManager;
   private DeviceBandwidthSampler mDeviceBandwidthSampler;
@@ -128,8 +129,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onPostExecute(Void v) {
       mDeviceBandwidthSampler.stopSampling();
-      // Retry for up to 10 times until we find a ConnectionClass.
-      if (mConnectionClass == ConnectionQuality.UNKNOWN && mTries < 10) {
+      if (mConnectionClass == ConnectionQuality.UNKNOWN && mTries < MAX_SAMPLE_RETRIES) {
         mTries++;
         new DownloadImage().execute(mURL);
       }

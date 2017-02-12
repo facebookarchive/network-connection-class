@@ -13,15 +13,14 @@ android {
 }
 
 dependencies {
-    compile 'com.google.code.findbugs:jsr305:2.0.1'
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.0.5-beta'
-    testCompile 'org.robolectric:robolectric:3.0'
-    testCompile ('org.powermock:powermock-api-mockito:1.6.2') {
+    testCompile 'org.mockito:mockito-core:2.0.44-beta'
+    testCompile ('org.powermock:powermock-api-mockito:1.6.3') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
-    testCompile ('org.powermock:powermock-module-junit4:1.6.2') {
+    testCompile ('org.powermock:powermock-module-junit4:1.6.3') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }

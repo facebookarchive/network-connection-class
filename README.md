@@ -13,7 +13,9 @@ Latency is also an important factor, but in our tests, we've found that bandwidt
 is a good proxy for both.
 
 The Network Connection Class library takes care of spikes using a moving average
-of the incoming samples:
+of the incoming samples, and also applies some hysteresis (both with a minimum
+number of samples and amount the average has to cross a boundary before triggering
+a bucket change):
 ![Bandwidth Averaging](https://github.com/facebook/network-connection-class/raw/master/docs/images/bandwidth_averaging.png)
 
 ## Integration
